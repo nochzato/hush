@@ -1,6 +1,7 @@
 package whisper
 
 import (
+	"bufio"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -8,6 +9,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"os"
+	"strings"
 	"syscall"
 
 	"golang.org/x/crypto/argon2"
@@ -23,12 +26,20 @@ const (
 	threads  = 4
 )
 
-func ReadPassword() (string, error) {
-	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+func ReadPassword(reader io.Reader) (string, error) {
+	if f, ok := reader.(*os.File); ok && term.IsTerminal(int(f.Fd())) {
+		bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			return "", err
+		}
+		return string(bytePassword), nil
+	}
+
+	password, err := bufio.NewReader(reader).ReadString('\n')
 	if err != nil {
 		return "", err
 	}
-	return string(bytePassword), nil
+	return strings.TrimSpace(password), nil
 }
 
 func HashMasterPassword(password string) (string, error) {

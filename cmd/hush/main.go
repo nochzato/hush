@@ -13,6 +13,16 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+func getMasterPassword() (string, error) {
+	fmt.Print("Enter your master password: ")
+	masterPassword, err := whisper.ReadPassword(os.Stdin)
+	if err != nil {
+		return "", fmt.Errorf("failed to read master password: %w", err)
+	}
+	fmt.Println()
+	return masterPassword, nil
+}
+
 func main() {
 	app := &cli.App{
 		Name:  "hush",
@@ -22,7 +32,11 @@ func main() {
 				Name:  "init",
 				Usage: "Initialize hush and set the master password",
 				Action: func(ctx *cli.Context) error {
-					return hushcore.InitHush()
+					masterPassword, err := getMasterPassword()
+					if err != nil {
+						return err
+					}
+					return hushcore.InitHush(masterPassword)
 				},
 			},
 			{
@@ -37,13 +51,17 @@ func main() {
 					name := ctx.Args().First()
 
 					fmt.Print("Enter the password: ")
-					password, err := whisper.ReadPassword()
+					password, err := whisper.ReadPassword(os.Stdin)
 					if err != nil {
 						return fmt.Errorf("failed to read password: %w", err)
 					}
 					fmt.Println()
 
-					err = hushcore.AddPassword(name, password)
+					masterPassword, err := getMasterPassword()
+					if err != nil {
+						return err
+					}
+					err = hushcore.AddPassword(name, password, masterPassword)
 					if err != nil {
 						if _, ok := err.(*whisper.PasswordStrengthError); ok {
 							fmt.Println("Error: ", err)
@@ -72,7 +90,12 @@ func main() {
 					}
 					name := ctx.Args().First()
 					displayPassword := ctx.Bool("display")
-					password, err := hushcore.GetPassword(name)
+
+					masterPassword, err := getMasterPassword()
+					if err != nil {
+						return err
+					}
+					password, err := hushcore.GetPassword(name, masterPassword)
 					if err != nil {
 						return fmt.Errorf("failed to get password: %w", err)
 					}
@@ -108,7 +131,11 @@ func main() {
 						return nil
 					}
 
-					err = hushcore.ImplodeHush()
+					masterPassword, err := getMasterPassword()
+					if err != nil {
+						return err
+					}
+					err = hushcore.ImplodeHush(masterPassword)
 					if err != nil {
 						return fmt.Errorf("failed to implode hush: %w", err)
 					}
