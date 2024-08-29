@@ -214,7 +214,9 @@ func GetPassword(name string) (string, error) {
 		return "", fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	return decryptedPassword, nil
+	trimmedPassword := strings.TrimSpace(decryptedPassword)
+
+	return trimmedPassword, nil
 }
 
 func readEncryptedMasterPassword() (string, error) {

@@ -26,26 +26,24 @@ func main() {
 				},
 			},
 			{
-				Name:    "add",
-				Aliases: []string{"a"},
-				Usage:   "Add a new password entry",
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:     "name",
-						Aliases:  []string{"n"},
-						Usage:    "Name of the password entry",
-						Required: true,
-					},
-					&cli.StringFlag{
-						Name:     "password",
-						Aliases:  []string{"p"},
-						Usage:    "Password for the entry",
-						Required: true,
-					}},
+				Name:      "add",
+				Aliases:   []string{"a"},
+				Usage:     "Add a new password entry",
+				ArgsUsage: "<name>",
 				Action: func(ctx *cli.Context) error {
-					name := ctx.String("name")
-					password := ctx.String("password")
-					err := hushcore.AddPassword(name, password)
+					if ctx.NArg() < 1 {
+						return fmt.Errorf("missing account name")
+					}
+					name := ctx.Args().First()
+
+					fmt.Print("Enter the password: ")
+					password, err := whisper.ReadPassword()
+					if err != nil {
+						return fmt.Errorf("failed to read password: %w", err)
+					}
+					fmt.Println()
+
+					err = hushcore.AddPassword(name, password)
 					if err != nil {
 						if _, ok := err.(*whisper.PasswordStrengthError); ok {
 							fmt.Println("Error: ", err)
