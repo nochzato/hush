@@ -63,6 +63,10 @@ func InitHush() error {
 	}
 	fmt.Println()
 
+	if err := whisper.CheckPasswordStrength(masterPassword); err != nil {
+		return fmt.Errorf("master password is too weak: %w", err)
+	}
+
 	key, salt, err := whisper.DeriveKey(masterPassword)
 	if err != nil {
 		return fmt.Errorf("failed to derive key: %w", err)
@@ -89,6 +93,10 @@ func AddPassword(name, password string) error {
 	sanitizedName, err := sanitizeFileName(name)
 	if err != nil {
 		return fmt.Errorf("invalid filename: %w", err)
+	}
+
+	if err := whisper.CheckPasswordStrength(password); err != nil {
+		return fmt.Errorf("password is too weak: %w", err)
 	}
 
 	salt, err := readSalt()
@@ -222,6 +230,47 @@ func readEncryptedMasterPassword() (string, error) {
 	}
 
 	return string(encryptedPassword), nil
+}
+
+func ImplodeHush() error {
+	encryptedMasterPassword, err := readEncryptedMasterPassword()
+	if err != nil {
+		return fmt.Errorf("failed to read stored master password hash: %w", err)
+	}
+
+	salt, err := readSalt()
+	if err != nil {
+		return fmt.Errorf("failed to read salt: %w", err)
+	}
+
+	fmt.Print("Enter your master password: ")
+	masterPassword, err := whisper.ReadPassword()
+	if err != nil {
+		return fmt.Errorf("failed to read master password: %w", err)
+	}
+	fmt.Println()
+
+	key, err := whisper.DeriveKeyWithSalt(masterPassword, salt)
+	if err != nil {
+		return fmt.Errorf("failed to derive key: %w", err)
+	}
+
+	_, err = whisper.DecryptPassword(encryptedMasterPassword, key)
+	if err != nil {
+		return fmt.Errorf("incorrect master password")
+	}
+
+	hushDir, err := getHushDir()
+	if err != nil {
+		return fmt.Errorf("failed to get hush directory: %w", err)
+	}
+
+	err = os.RemoveAll(hushDir)
+	if err != nil {
+		return fmt.Errorf("failed to delete hush directory: %w", err)
+	}
+
+	return nil
 }
 
 func sanitizeFileName(name string) (string, error) {
