@@ -1,0 +1,2 @@
+# hush
+Secure password manager
