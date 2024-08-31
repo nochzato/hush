@@ -135,3 +135,24 @@ func TestRemovePassword(t *testing.T) {
 	_, err = os.Stat(filePath)
 	require.Error(t, err)
 }
+
+func TestImplodeHush(t *testing.T) {
+	tempDir, clean := setupTestDir(t)
+	defer clean()
+
+	masterPassword := "strongMasterPassword123!"
+	err := InitHush(masterPassword)
+	require.NoError(t, err)
+
+	name := "testname"
+	password := "testPassword123!"
+
+	err = AddPassword(name, password, masterPassword)
+	require.NoError(t, err)
+
+	err = ImplodeHush(masterPassword)
+	require.NoError(t, err)
+
+	_, err = os.Stat(tempDir)
+	require.Error(t, err)
+}
