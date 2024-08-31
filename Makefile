@@ -17,6 +17,6 @@ uninstall:
 	rm -f $(INSTALL_DIR)/$(BINARY_NAME)
 
 test:
-	go test ./...
+	go test -cover -v ./...
 
 .PHONY: build clean install uninstall

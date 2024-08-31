@@ -89,9 +89,8 @@ func TestAddPassword(t *testing.T) {
 
 	filePath := filepath.Join(tempDir, name+".hush")
 
-	if _, err := os.Stat(filePath); err != nil {
-		require.NoError(t, err)
-	}
+	_, err = os.Stat(filePath)
+	require.NoError(t, err)
 }
 
 func TestAddAndGetPassword(t *testing.T) {
@@ -112,4 +111,27 @@ func TestAddAndGetPassword(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, retrievedPassword, password)
+}
+
+func TestRemovePassword(t *testing.T) {
+	tempDir, clean := setupTestDir(t)
+	defer clean()
+
+	masterPassword := "strongMasterPassword123!"
+	err := InitHush(masterPassword)
+	require.NoError(t, err)
+
+	name := "testname"
+	password := "testPassword123!"
+
+	err = AddPassword(name, password, masterPassword)
+	require.NoError(t, err)
+
+	err = RemovePassword(name, masterPassword)
+	require.NoError(t, err)
+
+	filePath := filepath.Join(tempDir, name+".hush")
+
+	_, err = os.Stat(filePath)
+	require.Error(t, err)
 }

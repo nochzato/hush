@@ -99,19 +99,9 @@ func AddPassword(name, password, masterPassword string) error {
 		return fmt.Errorf("failed to read salt: %w", err)
 	}
 
-	encryptedMasterPassword, err := readEncryptedMasterPassword()
+	decryptedMasterPassword, err := validateMasterPassword(salt, masterPassword)
 	if err != nil {
-		return fmt.Errorf("failed to read encrypted master password: %w", err)
-	}
-
-	key, err := whisper.DeriveKeyWithSalt(masterPassword, salt)
-	if err != nil {
-		return fmt.Errorf("failed to derive key: %w", err)
-	}
-
-	decryptedMasterPassword, err := whisper.DecryptPassword(encryptedMasterPassword, key)
-	if err != nil {
-		return fmt.Errorf("incorrect master password")
+		return fmt.Errorf("error validating master password: %w", err)
 	}
 
 	encryptionKey, err := whisper.DeriveKeyWithSalt(decryptedMasterPassword, salt)
@@ -158,9 +148,7 @@ func GetPassword(name, masterPassword string) (string, error) {
 		return "", err
 	}
 
-	filePath := filepath.Join(hushDir, sanitizedName+".hush")
-
-	encryptedPassword, err := os.ReadFile(filePath)
+	encryptedPassword, err := readEncryptedPassword(hushDir, sanitizedName)
 	if err != nil {
 		return "", fmt.Errorf("failed to read password file: %w", err)
 	}
@@ -170,19 +158,9 @@ func GetPassword(name, masterPassword string) (string, error) {
 		return "", fmt.Errorf("failed to read salt: %w", err)
 	}
 
-	encryptedMasterPassword, err := readEncryptedMasterPassword()
+	decryptedMasterPassword, err := validateMasterPassword(salt, masterPassword)
 	if err != nil {
-		return "", fmt.Errorf("failed to read encrypted master password: %w", err)
-	}
-
-	key, err := whisper.DeriveKeyWithSalt(masterPassword, salt)
-	if err != nil {
-		return "", fmt.Errorf("failed to derive key: %w", err)
-	}
-
-	decryptedMasterPassword, err := whisper.DecryptPassword(encryptedMasterPassword, key)
-	if err != nil {
-		return "", fmt.Errorf("incorrect master password")
+		return "", fmt.Errorf("error validating master password: %w", err)
 	}
 
 	encryptionKey, err := whisper.DeriveKeyWithSalt(decryptedMasterPassword, salt)
@@ -198,6 +176,61 @@ func GetPassword(name, masterPassword string) (string, error) {
 	trimmedPassword := strings.TrimSpace(decryptedPassword)
 
 	return trimmedPassword, nil
+}
+
+func validateMasterPassword(salt, masterPassword string) (decryptedMasterPassword string, err error) {
+	encryptedMasterPassword, err := readEncryptedMasterPassword()
+	if err != nil {
+		return "", fmt.Errorf("failed to read encrypted master password: %w", err)
+	}
+
+	key, err := whisper.DeriveKeyWithSalt(masterPassword, salt)
+	if err != nil {
+		return "", fmt.Errorf("failed to derive key: %w", err)
+	}
+
+	decryptedMasterPassword, err = whisper.DecryptPassword(encryptedMasterPassword, key)
+	if err != nil {
+		return "", fmt.Errorf("incorrect master password")
+	}
+
+	return decryptedMasterPassword, nil
+}
+
+func readEncryptedPassword(hushDir, name string) ([]byte, error) {
+	filePath := filepath.Join(hushDir, name+".hush")
+
+	encryptedPassword, err := os.ReadFile(filePath)
+	return encryptedPassword, err
+}
+
+func RemovePassword(name, masterPassword string) error {
+	hushDir, err := getHushDir()
+	if err != nil {
+		return err
+	}
+
+	_, err = readEncryptedPassword(hushDir, name)
+	if err != nil {
+		return fmt.Errorf("failed to read password file: %w", err)
+	}
+
+	salt, err := readSalt()
+	if err != nil {
+		return fmt.Errorf("failed to read salt: %w", err)
+	}
+
+	_, err = validateMasterPassword(salt, masterPassword)
+	if err != nil {
+		return fmt.Errorf("error validating master password: %w", err)
+	}
+
+	filePath := filepath.Join(hushDir, name+".hush")
+	if err := os.Remove(filePath); err != nil {
+		return fmt.Errorf("failed to delete password file: %w", err)
+	}
+
+	return nil
 }
 
 func readEncryptedMasterPassword() (string, error) {
