@@ -73,6 +73,23 @@ func main() {
 				},
 			},
 			{
+				Name:    "list",
+				Aliases: []string{"ls"},
+				Usage:   "List all password names",
+				Action: func(ctx *cli.Context) error {
+					passwordNames, err := hushcore.ListPasswordNames()
+					if err != nil {
+						return fmt.Errorf("failed to list passwords: %w", err)
+					}
+
+					for _, name := range passwordNames {
+						fmt.Println(name)
+					}
+
+					return nil
+				},
+			},
+			{
 				Name:      "get",
 				Aliases:   []string{"g"},
 				Usage:     "Retrieve a password",

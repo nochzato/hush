@@ -137,6 +137,29 @@ func savePassword(name, encryptedPassword string) error {
 	return nil
 }
 
+func ListPasswordNames() ([]string, error) {
+	hushDir, err := getHushDir()
+	if err != nil {
+		return nil, err
+	}
+
+	entries, err := os.ReadDir(hushDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list hush directory: %w", err)
+	}
+
+	passwordNames := []string{}
+
+	for _, e := range entries {
+		trimmedName, found := strings.CutSuffix(e.Name(), ".hush")
+		if found {
+			passwordNames = append(passwordNames, trimmedName)
+		}
+	}
+
+	return passwordNames, nil
+}
+
 func GetPassword(name, masterPassword string) (string, error) {
 	sanitizedName, err := sanitizeFileName(name)
 	if err != nil {

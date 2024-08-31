@@ -156,3 +156,25 @@ func TestImplodeHush(t *testing.T) {
 	_, err = os.Stat(tempDir)
 	require.Error(t, err)
 }
+
+func TestListPasswordNames(t *testing.T) {
+	_, clean := setupTestDir(t)
+	defer clean()
+
+	masterPassword := "strongMasterPassword123!"
+	err := InitHush(masterPassword)
+	require.NoError(t, err)
+
+	passwordNames := []string{"testname", "testname1", "testname3"}
+	password := "testPassword123!"
+
+	for _, name := range passwordNames {
+		err = AddPassword(name, password, masterPassword)
+		require.NoError(t, err)
+	}
+
+	got, err := ListPasswordNames()
+	require.NoError(t, err)
+
+	require.Equal(t, got, passwordNames)
+}
