@@ -95,10 +95,12 @@ func main() {
 					if err != nil {
 						return err
 					}
+
 					password, err := hushcore.GetPassword(name, masterPassword)
 					if err != nil {
 						return fmt.Errorf("failed to get password: %w", err)
 					}
+
 					if displayPassword {
 						fmt.Println(password)
 					} else {
@@ -108,6 +110,31 @@ func main() {
 						}
 						fmt.Println("Password copied to clipboard.")
 					}
+
+					return nil
+				},
+			},
+			{
+				Name:      "remove",
+				Aliases:   []string{"rm"},
+				Usage:     "Remove a password",
+				ArgsUsage: "<name>",
+				Action: func(ctx *cli.Context) error {
+					if ctx.NArg() < 1 {
+						return fmt.Errorf("missing password name")
+					}
+					name := ctx.Args().First()
+
+					masterPassword, err := getMasterPassword()
+					if err != nil {
+						return err
+					}
+
+					err = hushcore.RemovePassword(name, masterPassword)
+					if err != nil {
+						return fmt.Errorf("failed to remove password: %w", err)
+					}
+
 					return nil
 				},
 			},
