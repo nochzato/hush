@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/nochzato/hush/internal/whisper"
+	"github.com/nochzato/hush/internal/passutils"
 )
 
 const (
@@ -58,16 +58,16 @@ func InitHush(masterPassword string) error {
 		return fmt.Errorf("hush is already initialized")
 	}
 
-	if err := whisper.CheckPasswordStrength(masterPassword); err != nil {
+	if err := passutils.CheckPasswordStrength(masterPassword); err != nil {
 		return fmt.Errorf("master password is too weak: %w", err)
 	}
 
-	key, salt, err := whisper.DeriveKey(masterPassword)
+	key, salt, err := passutils.DeriveKey(masterPassword)
 	if err != nil {
 		return fmt.Errorf("failed to derive key: %w", err)
 	}
 
-	encryptedMasterPassword, err := whisper.EncryptPassword(masterPassword, key)
+	encryptedMasterPassword, err := passutils.EncryptPassword(masterPassword, key)
 	if err != nil {
 		return fmt.Errorf("failed to encrypt master password: %w", err)
 	}
@@ -90,7 +90,7 @@ func AddPassword(name, password, masterPassword string) error {
 		return fmt.Errorf("invalid filename: %w", err)
 	}
 
-	if err := whisper.CheckPasswordStrength(password); err != nil {
+	if err := passutils.CheckPasswordStrength(password); err != nil {
 		return fmt.Errorf("password is too weak: %w", err)
 	}
 
@@ -104,12 +104,12 @@ func AddPassword(name, password, masterPassword string) error {
 		return fmt.Errorf("error validating master password: %w", err)
 	}
 
-	encryptionKey, err := whisper.DeriveKeyWithSalt(decryptedMasterPassword, salt)
+	encryptionKey, err := passutils.DeriveKeyWithSalt(decryptedMasterPassword, salt)
 	if err != nil {
 		return fmt.Errorf("failed to derive encryption key: %w", err)
 	}
 
-	encryptedPassword, err := whisper.EncryptPassword(password, encryptionKey)
+	encryptedPassword, err := passutils.EncryptPassword(password, encryptionKey)
 	if err != nil {
 		return fmt.Errorf("failed to encrypt password: %w", err)
 	}
@@ -186,12 +186,12 @@ func GetPassword(name, masterPassword string) (string, error) {
 		return "", fmt.Errorf("error validating master password: %w", err)
 	}
 
-	encryptionKey, err := whisper.DeriveKeyWithSalt(decryptedMasterPassword, salt)
+	encryptionKey, err := passutils.DeriveKeyWithSalt(decryptedMasterPassword, salt)
 	if err != nil {
 		return "", fmt.Errorf("failed to derive encryption key: %w", err)
 	}
 
-	decryptedPassword, err := whisper.DecryptPassword(string(encryptedPassword), encryptionKey)
+	decryptedPassword, err := passutils.DecryptPassword(string(encryptedPassword), encryptionKey)
 	if err != nil {
 		return "", fmt.Errorf("failed to decrypt password: %w", err)
 	}
@@ -207,12 +207,12 @@ func validateMasterPassword(salt, masterPassword string) (decryptedMasterPasswor
 		return "", fmt.Errorf("failed to read encrypted master password: %w", err)
 	}
 
-	key, err := whisper.DeriveKeyWithSalt(masterPassword, salt)
+	key, err := passutils.DeriveKeyWithSalt(masterPassword, salt)
 	if err != nil {
 		return "", fmt.Errorf("failed to derive key: %w", err)
 	}
 
-	decryptedMasterPassword, err = whisper.DecryptPassword(encryptedMasterPassword, key)
+	decryptedMasterPassword, err = passutils.DecryptPassword(encryptedMasterPassword, key)
 	if err != nil {
 		return "", fmt.Errorf("incorrect master password")
 	}
@@ -282,12 +282,12 @@ func ImplodeHush(masterPassword string) error {
 		return fmt.Errorf("failed to read salt: %w", err)
 	}
 
-	key, err := whisper.DeriveKeyWithSalt(masterPassword, salt)
+	key, err := passutils.DeriveKeyWithSalt(masterPassword, salt)
 	if err != nil {
 		return fmt.Errorf("failed to derive key: %w", err)
 	}
 
-	_, err = whisper.DecryptPassword(encryptedMasterPassword, key)
+	_, err = passutils.DecryptPassword(encryptedMasterPassword, key)
 	if err != nil {
 		return fmt.Errorf("incorrect master password")
 	}
