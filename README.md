@@ -1,6 +1,6 @@
-# Hush: Secure CLI Password Manager
+# hush: Secure CLI Password Manager
 
-Hush is a command-line interface (CLI) password manager designed for security and ease of use.
+hush is a command-line interface (CLI) password manager designed for security and ease of use.
 
 - [Installation](#installation)
 - [Security Features](#security-features)
@@ -59,7 +59,7 @@ This will build the project and install the `hush` binary in `/usr/local/bin/`.
 
 ### Using Go Install
 
-If you have Go installed and configured, you can install Hush directly using:
+If you have Go installed and configured, you can install hush directly using:
 
 ```bash
 go install github.com/nochzato/hush/cmd/hush@latest
@@ -69,13 +69,13 @@ This will download, compile, and install the `hush` binary in your `$GOPATH/bin`
 
 ### Verifying Installation
 
-After installation, verify that Hush is installed correctly:
+After installation, verify that hush is installed correctly:
 
 ```bash
 hush version
 ```
 
-This should display the version of Hush you've installed.
+This should display the version of hush you've installed.
 ## Security Features
 
 - **Master Password**: Single point of access for all stored passwords
@@ -89,13 +89,13 @@ This should display the version of Hush you've installed.
 ```bash
 hush version
 ```
-Show the current version of Hush.
+Show the current version of hush.
 
 ### Initialize Hush
 ```bash
 hush init
 ```
-Set up Hush and create your master password.
+Set up hush and create your master password.
 
 ### Add a Password
 ```bash
@@ -142,7 +142,7 @@ By default, the generated password is copied to the clipboard for convenience.
 ```bash
 hush implode
 ```
-Remove all stored data and the Hush directory.
+Remove all stored data and the hush directory.
 
 ## Usage Example
 
