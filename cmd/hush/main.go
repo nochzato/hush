@@ -9,13 +9,13 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/nochzato/hush/internal/hushcore"
-	"github.com/nochzato/hush/internal/whisper"
+	"github.com/nochzato/hush/internal/passutils"
 	"github.com/urfave/cli/v2"
 )
 
 func getMasterPassword() (string, error) {
 	fmt.Print("Enter your master password: ")
-	masterPassword, err := whisper.ReadPassword(os.Stdin)
+	masterPassword, err := passutils.ReadPassword(os.Stdin)
 	if err != nil {
 		return "", fmt.Errorf("failed to read master password: %w", err)
 	}
@@ -51,7 +51,7 @@ func main() {
 					name := ctx.Args().First()
 
 					fmt.Print("Enter the password: ")
-					password, err := whisper.ReadPassword(os.Stdin)
+					password, err := passutils.ReadPassword(os.Stdin)
 					if err != nil {
 						return fmt.Errorf("failed to read password: %w", err)
 					}
@@ -63,7 +63,7 @@ func main() {
 					}
 					err = hushcore.AddPassword(name, password, masterPassword)
 					if err != nil {
-						if _, ok := err.(*whisper.PasswordStrengthError); ok {
+						if _, ok := err.(*passutils.PasswordStrengthError); ok {
 							fmt.Println("Error: ", err)
 						}
 						return fmt.Errorf("failed to add password: %w", err)
