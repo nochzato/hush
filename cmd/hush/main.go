@@ -156,6 +156,64 @@ func main() {
 				},
 			},
 			{
+				Name:    "generate",
+				Aliases: []string{"gen"},
+				Usage:   "Generate a new password",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:    "length",
+						Aliases: []string{"l"},
+						Value:   16,
+						Usage:   "Length of the generated password",
+					},
+					&cli.BoolFlag{
+						Name:    "display",
+						Aliases: []string{"d"},
+						Usage:   "Display password instead of copying to clipboard",
+					},
+				},
+				Action: func(ctx *cli.Context) error {
+					length := ctx.Int("length")
+					display := ctx.Bool("display")
+
+					password, err := passutils.GeneratePassword(length)
+					if err != nil {
+						return fmt.Errorf("failed to generate password: %w", err)
+					}
+
+					if display {
+						fmt.Printf("Generated password: %s\n", password)
+					} else {
+						if err = clipboard.WriteAll(password); err != nil {
+							return fmt.Errorf("failed to copy password to clipboard: %w", err)
+						}
+						fmt.Println("Password copied to clipboard.")
+					}
+
+					fmt.Print("Do you want to save this password? (y/N): ")
+					var response string
+					fmt.Scanln(&response)
+
+					if response == "y" || response == "Y" {
+						fmt.Print("Enter a name for this password: ")
+						var name string
+						fmt.Scanln(&name)
+
+						masterPassword, err := getMasterPassword()
+						if err != nil {
+							return err
+						}
+
+						if err = hushcore.AddPassword(name, password, masterPassword); err != nil {
+							fmt.Errorf("failed to save password: %w", err)
+						}
+						fmt.Printf("Password saved as %q.\n", name)
+					}
+
+					return nil
+				},
+			},
+			{
 				Name:  "implode",
 				Usage: "Delete all data and remove the .hush directory",
 				Action: func(ctx *cli.Context) error {
