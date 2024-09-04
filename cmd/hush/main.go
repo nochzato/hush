@@ -13,6 +13,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+const version = "1.0.0"
+
 func getMasterPassword() (string, error) {
 	fmt.Print("Enter your master password: ")
 	masterPassword, err := passutils.ReadPassword(os.Stdin)
@@ -28,6 +30,14 @@ func main() {
 		Name:  "hush",
 		Usage: "A CLI tool for password management",
 		Commands: []*cli.Command{
+			{
+				Name:  "version",
+				Usage: "Display the version of hush",
+				Action: func(ctx *cli.Context) error {
+					fmt.Printf("v%s\n", version)
+					return nil
+				},
+			},
 			{
 				Name:  "init",
 				Usage: "Initialize hush and set the master password",

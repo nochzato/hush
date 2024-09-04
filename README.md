@@ -2,6 +2,80 @@
 
 Hush is a command-line interface (CLI) password manager designed for security and ease of use.
 
+- [Installation](#installation)
+- [Security Features](#security-features)
+- [Commands](#commands)
+- [Usage Example](#usage-example)
+- [Contributing](#contributing)
+- [Support](#support)
+
+## Installation
+
+### Prerequisites
+
+- Go 1.16 or later
+- Make (for Make installation method)
+
+### Installing with Make
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/nochzato/hush.git
+   ```
+
+2. Navigate to the project directory:
+   ```bash
+   cd hush
+   ```
+
+3. Run the make install command:
+   ```bash
+   make install
+   ```
+
+This will build the project and install the `hush` binary in `/usr/local/bin/`.
+
+### Installing from Source
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/nochzato/hush.git
+   ```
+
+2. Navigate to the project directory:
+   ```bash
+   cd hush
+   ```
+
+3. Build the project:
+   ```bash
+   go build -o hush cmd/hush/main.go
+   ```
+
+4. (Optional) Move the binary to a directory in your PATH for easy access:
+   ```bash
+   sudo mv hush /usr/local/bin/
+   ```
+
+### Using Go Install
+
+If you have Go installed and configured, you can install Hush directly using:
+
+```bash
+go install github.com/nochzato/hush/cmd/hush@latest
+```
+
+This will download, compile, and install the `hush` binary in your `$GOPATH/bin` directory.
+
+### Verifying Installation
+
+After installation, verify that Hush is installed correctly:
+
+```bash
+hush version
+```
+
+This should display the version of Hush you've installed.
 ## Security Features
 
 - **Master Password**: Single point of access for all stored passwords
@@ -10,6 +84,12 @@ Hush is a command-line interface (CLI) password manager designed for security an
 - **Secure Storage**: Encrypted passwords stored locally with restricted access
 
 ## Commands
+
+### Display Version
+```bash
+hush version
+```
+Show the current version of Hush.
 
 ### Initialize Hush
 ```bash
@@ -31,7 +111,7 @@ Display all stored password names.
 
 ### Retrieve a Password
 ```bash
-hush get <account-name> [flags]
+hush get <password-name> [flags]
 ```
 Fetch a stored password.
 
