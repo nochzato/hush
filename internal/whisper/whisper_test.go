@@ -37,11 +37,6 @@ func TestCheckPasswordStrength(t *testing.T) {
 			password: "strongPass!",
 			wantErr:  true,
 		},
-		{
-			name:     "no special",
-			password: "strongPass123",
-			wantErr:  true,
-		},
 	}
 
 	for _, tt := range tc {

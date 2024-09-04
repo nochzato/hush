@@ -14,7 +14,6 @@ func CheckPasswordStrength(password string) error {
 		hasUpper     = false
 		hasLower     = false
 		hasNumber    = false
-		hasSpecial   = false
 	)
 
 	if len(password) >= 6 {
@@ -29,8 +28,6 @@ func CheckPasswordStrength(password string) error {
 			hasLower = true
 		case unicode.IsNumber(char):
 			hasNumber = true
-		case unicode.IsPunct(char) || unicode.IsSymbol(char):
-			hasSpecial = true
 		}
 	}
 
@@ -45,9 +42,6 @@ func CheckPasswordStrength(password string) error {
 	}
 	if !hasNumber {
 		return &PasswordStrengthError{"Password must contain at least one number"}
-	}
-	if !hasSpecial {
-		return &PasswordStrengthError{"Password must contain at least one special character"}
 	}
 
 	return nil
